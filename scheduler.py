@@ -32,10 +32,10 @@ class Scheduler:
         Add job to queue scheduler.
         """
         if len(self._job_queue) == self.pool_size:
-            raise MaxCountJobError("The scheduler supports " "no "
-                                   "more than 10 tasks!")
+            raise MaxCountJobError("The scheduler supports "
+                                   "no more than 10 tasks!")
         self._job_queue.append(job)
-        logging.info(f"Add job: {job.id}")
+        logging.info("Add job: %d", job.id)
 
     def check_screen_scheduler(self):
         name_file = "screen_scheduler.json"
@@ -43,7 +43,6 @@ class Scheduler:
             return
         with open(name_file) as file:
             json_data = json.load(file)
-        print(json_data)
         for job in json_data:
             json_data[job]["target"] = self.tasks[json_data[job]["target"]]
             self._job_queue.append(Job(**json_data[job]))
@@ -62,35 +61,36 @@ class Scheduler:
                 return None
             job = self._job_queue.pop(0)
             try:
-                logging.info(f"Job {job.id} start.")
+                logging.info("Job %d start.", job.id)
                 job.run()  # run job
             except StopIteration:
-                logging.info(f"Job {job.id} finished.")
+                logging.info("Job %d finished.", job.id)
                 job.is_completed = True
                 continue
             except TimeoutError:
-                logging.error(f"Job {job.id} finished with TimeoutError.")
+                logging.error("Job %d finished with TimeoutError.", job.id)
                 continue
             except DependenciesExistError:
-                logging.info(f"Job {job.id} wait for dependencies. "
-                             f"Skipping...")
+                logging.info("Job %d wait for dependencies. "
+                             "Skipping...", job.id)
                 if job.count_started >= job.tries:
-                    logging.info(f"Job {job.id} exceeded the number "
-                                 f"of restarts")
+                    logging.info("Job %d exceeded the number "
+                                 "of restarts", job.id)
                     continue
             except TimeNotComeException:
                 logging.info(
-                    f"The time for completing the job {job.id} has not yet "
-                    f"come. Skipping..."
+                    "The time for completing the job %d has not yet "
+                    "come. Skipping...", job.id
                 )
             except Exception as error:
-                logging.info(f"In work job {job.id} happened error: {error}")
+                logging.info("In work job %d happened error: %d", job.id,
+                             error)
                 if job.count_started >= job.tries:
-                    logging.info(f"Job {job.id} exceeded the number "
-                                 f"of restarts")
+                    logging.info("Job %d exceeded the number "
+                                 "of restarts", job.id)
                     continue
 
-            logging.info(f"Job {job.id} add to queue.")
+            logging.info("Job %d add to queue.", job.id)
             self._job_queue.append(job)
             time.sleep(1)
         logging.info("Scheduler is stop.")

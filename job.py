@@ -19,7 +19,7 @@ class Job:
         self.start_at = start_at
         self.max_working_time = max_working_time  # in seconds
         self.tries = tries
-        self.dependencies: [Job] = dependencies
+        self.dependencies: list[Job] = dependencies
         self.target = target
         self.args = args
         self.is_completed = False
